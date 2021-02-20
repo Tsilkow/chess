@@ -12,7 +12,9 @@ SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
 
 include_directories("inc")
 set(SOURCES
-	src/commons.cpp)
+	src/commons.cpp
+	src/piece.cpp
+	src/position.cpp)
 
 find_package(SFML 2.5 COMPONENTS graphics audio REQUIRED)
 add_library(Modules SHARED ${SOURCES})
