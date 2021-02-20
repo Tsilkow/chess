@@ -7,14 +7,14 @@ FEN getDefaultStart()
 }
 
 Board::Board(FEN startPos):
+    m_pieces(&SquareLComp),
+    m_moves(&MoveLComp),
     m_whiteToMove(true),
     m_wKCastle(false),
     m_wQCastle(false),
     m_bKCastle(false),
     m_bQCastle(false),
-    m_enpassant(getInvalidSquare()),
-    m_obstacles(9, std::vector<int>(9, 0))
-    
+    m_enpassant(getInvalidSquare())
 {
     // Catching obvious FEN mistakes
     
@@ -84,52 +84,40 @@ Board::Board(FEN startPos):
 		    case '2': ++c;
 		    case '1': break;
 		    case 'p':
-			m_pieces.emplace_back(std::make_shared<Pawn>  (false, Square(c, r)));
-			m_obstacles[c][r] = -1;
+			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<Pawn>  (false)));
 			break;
 		    case 'n':
-			m_pieces.emplace_back(std::make_shared<Knight>(false, Square(c, r))); 
-			m_obstacles[c][r] = -1;
+			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<Knight>(false)));
 			break;
 		    case 'b':
-			m_pieces.emplace_back(std::make_shared<Bishop>(false, Square(c, r))); 
-			m_obstacles[c][r] = -1;
+			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<Bishop>(false)));
 			break;
 		    case 'r':
-			m_pieces.emplace_back(std::make_shared<Rook>  (false, Square(c, r))); 
-			m_obstacles[c][r] = -1;
+			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<Rook>  (false)));
 			break;
 		    case 'q':
-			m_pieces.emplace_back(std::make_shared<Queen> (false, Square(c, r))); 
-			m_obstacles[c][r] = -1;
+			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<Queen> (false)));
 			break;
 		    case 'k':
-			m_pieces.emplace_back(std::make_shared<King>  (false, Square(c, r))); 
-			m_obstacles[c][r] = -1;
+			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<King>  (false)));
 			break;
 		    case 'P':
-			m_pieces.emplace_back(std::make_shared<Pawn>  (true,  Square(c, r))); 
-			m_obstacles[c][r] = 1;
+			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<Pawn>  (true)));
 			break;
 		    case 'N':
-			m_pieces.emplace_back(std::make_shared<Knight>(true,  Square(c, r))); 
-			m_obstacles[c][r] = 1;
+			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<Knight>(true)));
 			break;
 		    case 'B':
-			m_pieces.emplace_back(std::make_shared<Bishop>(true,  Square(c, r))); 
-			m_obstacles[c][r] = 1;
+			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<Bishop>(true)));
 			break;
 		    case 'R':
-			m_pieces.emplace_back(std::make_shared<Rook>  (true,  Square(c, r))); 
-			m_obstacles[c][r] = 1;
+			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<Rook>  (true)));
 			break;
 		    case 'Q':
-			m_pieces.emplace_back(std::make_shared<Queen> (true,  Square(c, r))); 
-			m_obstacles[c][r] = 1;
+			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<Queen> (true)));
 			break;
 		    case 'K':
-			m_pieces.emplace_back(std::make_shared<King>  (true,  Square(c, r))); 
-			m_obstacles[c][r] = 1;
+			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<King>  (true)));
 			break;
 		    default:
 			std::cout << "!ERROR! Invalid character in 1st segment of FEN in starting position. Using default starting position ..." << std::endl;
@@ -223,18 +211,6 @@ Board::Board(FEN startPos):
 	}
 	
     }while(error);
-
-    std::cout << m_pieces.size() << std::endl;
-
-    for(int i = 0; i < m_obstacles[0].size(); ++i)
-    {
-	for(int j = 0; j < m_obstacles.size(); ++j)
-	{
-	    std::cout << m_obstacles[j][i] << " ";
-	}
-	std::cout << std::endl;
-    }
-    
 }
 
 void Board::findMoves()
@@ -243,13 +219,11 @@ void Board::findMoves()
     
     for(auto &p: m_pieces)
     {
-	if(p->isWhite() == m_whiteToMove)
+	if(p.second->isWhite() == m_whiteToMove)
 	{
-	    std::cout << p->getAbbrev() << " " << p->getSquare() << std::endl;
-	    
-	    std::vector<Move> temp = p->getMoves(m_obstacles);
+	    std::set<Move, decltype(&MoveLComp)> temp = p.second->getMoves(p.first, m_pieces);
 
-	    m_moves.insert(m_moves.end(), temp.begin(), temp.end());
+	    m_moves.merge(temp);
 	}
     }
 }
@@ -258,28 +232,16 @@ bool Board::makeAMove(Move chosen)
 {
     if(m_moves.find(chosen) != m_moves.end())
     {
-	for(auto it = m_pieces.start(); it != m_pieces.end();)
-	{
-	    if(chosen.to == it->getSquare())
-	    {
-		it = m_pieces.erase(it);
-		break;
-	    }
-	    else ++it;
-	}
-	for(auto it = m_pieces.start(); it != m_pieces.end(); ++it)
-	{
-	    if(chosen.from == it->getSquare())
-	    {
-		it->move(chosen);
-		break;
-	    }
-	}
+	auto pieceToMove = m_pieces.extract(chosen.from);
+	auto pieceToCapture = m_pieces.find(chosen.to);
 	
-	atSquare(m_obstacles, chosen.to) = atSquare(m_obstacles, chosen.from);
-	atSquare(m_obstacles, chosen.from) = 0;
+	if(pieceToCapture != m_pieces.end()) m_pieces.erase(pieceToCapture);
+	
+	pieceToMove.key() = chosen.to;
+	m_pieces.insert(std::move(pieceToMove));
 
 	m_moves.clear();
+	m_whiteToMove = !m_whiteToMove;
 
 	return true;
     }

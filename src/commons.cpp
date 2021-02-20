@@ -48,3 +48,15 @@ void operator+=(Square& a, const Square& b)
     a.c += b.c;
     a.r += b.r;
 }
+
+bool SquareLComp(const Square& a, const Square& b)
+{
+    if(a.c == b.c) return (a.r < b.r);
+    else return (a.c < b.c);
+}
+
+bool MoveLComp(const Move& a, const Move& b)
+{
+    if(a.from == b.from) return SquareLComp(a.to, b.to);
+    else return SquareLComp(a.from, b.from);
+}

@@ -1,4 +1,4 @@
 # Chess
-An exercise to wirte a working chess interface
+An exercise to write a working chess interface
 
 ## SFML is required to run

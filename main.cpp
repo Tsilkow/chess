@@ -12,20 +12,32 @@
 
 #include "commons.hpp"
 #include "piece.hpp"
-#include "position.hpp"
+#include "board.hpp"
 
 
 //using namespace std;
 
 int main()
 {
-    Position position;
+    Board board;
 
-    std::vector<Move> moves = position.getMoves();
-
-    for(auto it = moves.begin(); it != moves.end(); ++it)
+    board.findMoves();
+    while(true)
     {
-	std::cout << it->from << it->to << std::endl;
+	auto moves = board.getMoves();
+
+	auto it = moves.begin();
+	for(int i = 0; i < moves.size(); ++i, ++it)
+	{
+	    std::cout << i+1 << ": " << it->from << it->to << std::endl;
+	}
+
+	getchar();
+	it = moves.begin();
+	++it; ++it; ++it;
+	board.makeAMove(*it);
+	
+	board.findMoves();
     }
     
     return 0;

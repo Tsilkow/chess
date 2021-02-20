@@ -3,6 +3,7 @@
 #include <iostream>
 #include <array>
 #include <vector>
+#include <map>
 #include <memory>
 #include <algorithm>
 
@@ -20,7 +21,7 @@ FEN getDefaultStart();
 class Board
 {
     private:
-    std::vector<std::shared_ptr<Piece>> m_pieces;
+    std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)> m_pieces;
     bool m_whiteToMove;
     bool m_wKCastle; // can white castle kingside
     bool m_wQCastle; // can white castle queenside
@@ -29,13 +30,14 @@ class Board
     Square m_enpassant; // en passant move in previous turn; if there wasn't one, it's set to InvalidSquare
     int m_movesSinceStart;
     int m_movesSinceCapture;
-    std::vector<std::vector<int>> m_obstacles;
-    std::vector<Move> m_moves;
+    std::set<Move, decltype(&MoveLComp)> m_moves;
     
     public:
-    Position(FEN start = getDefaultStart());
+    Board(FEN start = getDefaultStart());
     
     void findMoves();
 
-    const std::vector<Move>& getMoves() {return m_moves; }
+    bool makeAMove(Move chosen);
+
+    const std::set<Move, decltype(&MoveLComp)>& getMoves() {return m_moves; }
 };

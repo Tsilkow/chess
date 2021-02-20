@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 project(Chess VERSION 1.0)
 set(CMAKE_BUILD_TYPE Debug)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
@@ -14,7 +14,7 @@ include_directories("inc")
 set(SOURCES
 	src/commons.cpp
 	src/piece.cpp
-	src/position.cpp)
+	src/board.cpp)
 
 find_package(SFML 2.5 COMPONENTS graphics audio REQUIRED)
 add_library(Modules SHARED ${SOURCES})

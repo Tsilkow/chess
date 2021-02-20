@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <memory>
 #include <sstream>
 
 
@@ -42,3 +43,6 @@ struct Move
     Square from;
     Square to;
 };
+
+bool SquareLComp(const Square& a, const Square& b);
+bool MoveLComp(const Move& a, const Move& b);

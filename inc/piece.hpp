@@ -1,6 +1,7 @@
 #pragma once
 
-
+#include <set>
+#include <map>
 #include "commons.hpp"
 
 
@@ -9,25 +10,21 @@ class Piece
     protected:
     std::string m_abbreviation;
     bool m_isWhite;
-    Square m_square;
     
     public:
     Piece() = delete;
 
-    Piece(std::string abbreviation, bool isWhite, Square square):
+    Piece(std::string abbreviation, bool isWhite):
 	m_abbreviation(abbreviation),
-	m_isWhite(isWhite),
-	m_square(square)
-	{std::cout << "[" << m_abbreviation << ", " << m_isWhite << ", " << m_square << "]\n"; }
+	m_isWhite(isWhite)
+	{std::cout << "[" << m_abbreviation << ", " << m_isWhite << "]\n"; }
 
-    bool move(Square moveTo);
-
-    virtual std::vector<Move> getMoves(const std::vector<std::vector<int>>& obstacles)=0;
+    virtual std::set<Move, decltype(&MoveLComp)> getMoves
+    (const Square& position, const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces)=0;
     // -1 = black, 0 = empty, 1 = white
     
-    const std::string& getAbbrev() {return m_abbreviation; }
-    const bool isWhite() {return m_isWhite; }
-    const Square& getSquare() {return m_square; }
+    const std::string& getAbbrev() const {return m_abbreviation; }
+    const bool isWhite() const {return m_isWhite; }
 };
 
 class Pawn: public Piece
@@ -35,9 +32,11 @@ class Pawn: public Piece
     private:
 
     public:
-    Pawn(bool isWhite, Square square): Piece("", isWhite, square) {};
+    Pawn(bool isWhite): Piece("", isWhite) {};
 
-    std::vector<Move> getMoves(const std::vector<std::vector<int>>& obstacles) override;
+    std::set<Move, decltype(&MoveLComp)> getMoves
+    (const Square& position,
+     const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces) override;
 };
 
 class Knight: public Piece
@@ -45,9 +44,11 @@ class Knight: public Piece
     private:
 
     public:
-    Knight(bool isWhite, Square square): Piece("N", isWhite, square) {};
+    Knight(bool isWhite): Piece("N", isWhite) {};
 
-    std::vector<Move> getMoves(const std::vector<std::vector<int>>& obstacles) override;
+    std::set<Move, decltype(&MoveLComp)> getMoves
+    (const Square& position,
+     const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces) override;
 };
 
 class Bishop: public Piece
@@ -55,9 +56,11 @@ class Bishop: public Piece
     private:
 
     public:
-    Bishop(bool isWhite, Square square): Piece("B", isWhite, square) {};
+    Bishop(bool isWhite): Piece("B", isWhite) {};
 
-    std::vector<Move> getMoves(const std::vector<std::vector<int>>& obstacles) override;
+    std::set<Move, decltype(&MoveLComp)> getMoves
+    (const Square& position,
+     const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces) override;
 };
 
 class Rook: public Piece
@@ -65,9 +68,11 @@ class Rook: public Piece
     private:
 
     public:
-    Rook(bool isWhite, Square square): Piece("R", isWhite, square) {};
+    Rook(bool isWhite): Piece("R", isWhite) {};
 
-    std::vector<Move> getMoves(const std::vector<std::vector<int>>& obstacles) override;
+    std::set<Move, decltype(&MoveLComp)> getMoves
+    (const Square& position,
+     const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces) override;
 };
 
 class Queen: public Piece
@@ -75,9 +80,11 @@ class Queen: public Piece
     private:
 
     public:
-    Queen(bool isWhite, Square square): Piece("Q", isWhite, square) {};
+    Queen(bool isWhite): Piece("Q", isWhite) {};
 
-    std::vector<Move> getMoves(const std::vector<std::vector<int>>& obstacles) override;
+    std::set<Move, decltype(&MoveLComp)> getMoves
+    (const Square& position,
+     const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces) override;
 };
 
 class King: public Piece
@@ -85,7 +92,9 @@ class King: public Piece
     private:
 
     public:
-    King(bool isWhite, Square square): Piece("K", isWhite, square) {};
+    King(bool isWhite): Piece("K", isWhite) {};
 
-    std::vector<Move> getMoves(const std::vector<std::vector<int>>& obstacles) override;
+    std::set<Move, decltype(&MoveLComp)> getMoves
+    (const Square& position,
+     const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces) override;
 };
