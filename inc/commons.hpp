@@ -44,5 +44,7 @@ struct Move
     Square to;
 };
 
+
+bool operator==(const Move& a, const Move& b);
 bool SquareLComp(const Square& a, const Square& b);
 bool MoveLComp(const Move& a, const Move& b);

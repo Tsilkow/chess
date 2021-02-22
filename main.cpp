@@ -13,31 +13,55 @@
 #include "commons.hpp"
 #include "piece.hpp"
 #include "board.hpp"
+#include "resources.hpp"
 
 
 //using namespace std;
 
 int main()
 {
-    Board board;
+    ResourceHolder<sf::Texture, std::string> textures;
 
-    board.findMoves();
-    while(true)
+    textures.load("board", "data/board.png");
+    textures.load("w" , "data/w.png" );
+    textures.load("wN", "data/wN.png");
+    textures.load("wB", "data/wB.png");
+    textures.load("wR", "data/wR.png");
+    textures.load("wQ", "data/wQ.png");
+    textures.load("wK", "data/wK.png");
+    textures.load("b" , "data/b.png" );
+    textures.load("bN", "data/bN.png");
+    textures.load("bB", "data/bB.png");
+    textures.load("bR", "data/bR.png");
+    textures.load("bQ", "data/bQ.png");
+    textures.load("bK", "data/bK.png");
+    
+    sf::RenderWindow window(sf::VideoMode(800, 800), "Chess");
+    window.setFramerateLimit(60);
+    
+    
+    Board board(textures);
+
+    bool exit = false;
+
+    while(!exit)
     {
-	auto moves = board.getMoves();
-
-	auto it = moves.begin();
-	for(int i = 0; i < moves.size(); ++i, ++it)
-	{
-	    std::cout << i+1 << ": " << it->from << it->to << std::endl;
-	}
-
-	getchar();
-	it = moves.begin();
-	++it; ++it; ++it;
-	board.makeAMove(*it);
+	window.clear();
+	board.draw(window);
+	window.display();
 	
 	board.findMoves();
+	std::vector<Move> moves = board.getMoves();
+	int chosen;
+	
+	for(int i = 0; i < moves.size(); ++i)
+	{
+	    std::cout << i+1 << ": " << moves[i].from << moves[i].to << std::endl;
+	}
+	do{
+	    std::cin >> chosen;
+	}while(chosen < 1 && chosen > moves.size());
+	board.makeAMove(moves[chosen-1]);
     }
     
     return 0;

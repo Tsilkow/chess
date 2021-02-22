@@ -6,9 +6,14 @@
 #include <map>
 #include <memory>
 #include <algorithm>
+#include <SFML/System.hpp>
+#include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
+#include <SFML/Audio.hpp>
 
 #include "commons.hpp"
 #include "piece.hpp"
+#include "resources.hpp"
 
 
 struct FEN
@@ -30,14 +35,17 @@ class Board
     Square m_enpassant; // en passant move in previous turn; if there wasn't one, it's set to InvalidSquare
     int m_movesSinceStart;
     int m_movesSinceCapture;
-    std::set<Move, decltype(&MoveLComp)> m_moves;
+    std::vector<Move> m_moves;
+    sf::Sprite m_boardSprite;
     
     public:
-    Board(FEN start = getDefaultStart());
+    Board(ResourceHolder<sf::Texture, std::string>& textures, FEN start = getDefaultStart());
     
     void findMoves();
 
     bool makeAMove(Move chosen);
 
-    const std::set<Move, decltype(&MoveLComp)>& getMoves() {return m_moves; }
+    void draw(sf::RenderTarget& target);
+
+    const std::vector<Move>& getMoves() {return m_moves; }
 };

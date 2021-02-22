@@ -49,6 +49,11 @@ void operator+=(Square& a, const Square& b)
     a.r += b.r;
 }
 
+bool operator==(const Move& a, const Move& b)
+{
+    return (a.from == b.from && a.to == b.to);
+}
+
 bool SquareLComp(const Square& a, const Square& b)
 {
     if(a.c == b.c) return (a.r < b.r);
