@@ -6,7 +6,10 @@ FEN getDefaultStart()
     return FEN{"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR", "w", "KQkq", "-", "0", "1"};
 }
 
-Board::Board(ResourceHolder<sf::Texture, std::string>& textures, FEN startPos):
+Board::Board(ResourceHolder<sf::Texture, std::string>* textures, FEN startPos):
+    m_textures(textures),
+    m_marks(&SquareLComp),
+    m_highlights(&SquareLComp),
     m_pieces(&SquareLComp),
     m_whiteToMove(true),
     m_wKCastle(false),
@@ -15,7 +18,7 @@ Board::Board(ResourceHolder<sf::Texture, std::string>& textures, FEN startPos):
     m_bQCastle(false),
     m_enpassant(getInvalidSquare())
 {
-    m_boardSprite.setTexture(textures.get("board"));
+    m_boardSprite.setTexture(textures->get("board"));
     m_boardSprite.setPosition(sf::Vector2f(0, 0));
     
     // Catching obvious FEN mistakes
@@ -225,6 +228,33 @@ Board::Board(ResourceHolder<sf::Texture, std::string>& textures, FEN startPos):
 	}
 	
     }while(error);
+
+    findMoves();
+}
+
+bool Board::mark(Square at)
+{
+    auto temp = m_marks.find(at);
+    if(temp == m_marks.end())
+    {
+	m_marks.insert(std::make_pair(at, sf::Sprite(m_textures->get("mark"))));
+	m_marks[at].setPosition(sf::Vector2f((at.c-1)*GgetTileSize(), (at.r-1)*GgetTileSize()));
+	return true;
+    }
+    m_marks.erase(temp);
+    return false;
+}
+
+bool Board::highlight(Square at)
+{
+    if(m_highlights.find(at) == m_highlights.end())
+    {
+	m_highlights.insert(std::make_pair(at, sf::Sprite(m_textures->get("highlight"))));
+	m_highlights[at].setPosition(sf::Vector2f((at.c-1)*GgetTileSize(), (at.r-1)*GgetTileSize()));
+	m_highlights[at].setColor(sf::Color(255, 255, 255, 128));
+	return true;
+    }
+    return false;
 }
 
 void Board::findMoves()
@@ -265,8 +295,8 @@ bool Board::makeAMove(Move chosen)
     pieceToMove.key() = chosen.to;
     m_pieces.insert(std::move(pieceToMove));
 
-    m_moves.clear();
     m_whiteToMove = !m_whiteToMove;
+    findMoves();
 
     return true;
 }
@@ -274,8 +304,16 @@ bool Board::makeAMove(Move chosen)
 void Board::draw(sf::RenderTarget& target)
 {
     target.draw(m_boardSprite);
+    for(auto &h: m_highlights)
+    {
+	target.draw(h.second);
+    }
     for(auto &p: m_pieces)
     {
 	p.second->draw(target);
+    }
+    for(auto &m: m_marks)
+    {
+	target.draw(m.second);
     }
 }

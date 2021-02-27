@@ -15,6 +15,8 @@ struct Square
     bool isValid();
 };
 
+inline int GgetTileSize() {return 100; }
+
 Square toSquare(std::string input);
 
 inline Square getInvalidSquare() {return Square(0, 0); }
@@ -44,7 +46,11 @@ struct Move
     Square to;
 };
 
+inline Move getInvalidMove() {return Move{getInvalidSquare(), getInvalidSquare()}; }
 
 bool operator==(const Move& a, const Move& b);
+inline bool operator!=(const Move& a, const Move& b) {return !(a == b); }
 bool SquareLComp(const Square& a, const Square& b);
 bool MoveLComp(const Move& a, const Move& b);
+
+std::ostream& operator<<(std::ostream& out, const Move& a);

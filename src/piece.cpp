@@ -1,13 +1,13 @@
 #include "piece.hpp"
 
 
-Piece::Piece(std::string abbreviation, bool isWhite, ResourceHolder<sf::Texture, std::string>& resources,
-	     Square startPos):
+Piece::Piece(std::string abbreviation, bool isWhite,
+	     ResourceHolder<sf::Texture, std::string>* textures, Square startPos):
 	m_abbreviation(abbreviation),
 	m_isWhite(isWhite)
 {
-    if(m_isWhite) m_sprite.setTexture(resources.get("w" + m_abbreviation));
-    else m_sprite.setTexture(resources.get("b" + m_abbreviation));
+    if(m_isWhite) m_sprite.setTexture(textures->get("w" + m_abbreviation));
+    else m_sprite.setTexture(textures->get("b" + m_abbreviation));
 
     move(startPos);
 }
@@ -37,7 +37,7 @@ std::vector<Move> Pawn::getMoves
     if(straight.isValid()  && pieces.count(straight) == 0)
     {
 	result.push_back(Move{position, straight});
-	if(position.r == 7 - 6*m_isWhite && doubled.isValid() && pieces.count(doubled) == 0)
+	if(position.r == 7 - 5*m_isWhite && doubled.isValid() && pieces.count(doubled) == 0)
 	    result.push_back(Move{position, doubled});
     }
     if(diagonal1.isValid() &&

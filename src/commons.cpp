@@ -65,3 +65,9 @@ bool MoveLComp(const Move& a, const Move& b)
     if(a.from == b.from) return SquareLComp(a.to, b.to);
     else return SquareLComp(a.from, b.from);
 }
+
+std::ostream& operator<<(std::ostream& out, const Move& a)
+{
+    out << a.from << a.to;
+    return out;
+}

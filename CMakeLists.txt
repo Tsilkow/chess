@@ -14,7 +14,9 @@ include_directories("inc")
 set(SOURCES
 	src/commons.cpp
 	src/piece.cpp
-	src/board.cpp)
+	src/board.cpp
+	src/player.cpp
+	src/game.cpp)
 
 find_package(SFML 2.5 COMPONENTS graphics audio REQUIRED)
 add_library(Modules SHARED ${SOURCES})

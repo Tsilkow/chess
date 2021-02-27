@@ -21,8 +21,8 @@ class Piece
     public:
     Piece() = delete;
 
-    Piece(std::string abbreviation, bool isWhite, ResourceHolder<sf::Texture, std::string>& resources,
-	  Square startPos);
+    Piece(std::string abbreviation, bool isWhite,
+	  ResourceHolder<sf::Texture, std::string>* textures, Square startPos);
     virtual std::vector<Move> getMoves
     (const Square& position, const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces)=0;
     // -1 = black, 0 = empty, 1 = white
@@ -40,8 +40,8 @@ class Pawn: public Piece
     private:
 
     public:
-    Pawn(bool isWhite, ResourceHolder<sf::Texture, std::string>& resources, Square startPos):
-	Piece("", isWhite, resources, startPos) {};
+    Pawn(bool isWhite, ResourceHolder<sf::Texture, std::string>* textures, Square startPos):
+	Piece("", isWhite, textures, startPos) {};
 
     std::vector<Move> getMoves
     (const Square& position,
@@ -53,8 +53,9 @@ class Knight: public Piece
     private:
 
     public:
-    Knight(bool isWhite, ResourceHolder<sf::Texture, std::string>& resources, Square startPos):
-	Piece("N", isWhite, resources, startPos) {};
+    Knight(bool isWhite, ResourceHolder<sf::Texture, std::string>* textures,
+	   Square startPos):
+	Piece("N", isWhite, textures, startPos) {};
 
     std::vector<Move> getMoves
     (const Square& position,
@@ -66,8 +67,9 @@ class Bishop: public Piece
     private:
 
     public:
-    Bishop(bool isWhite, ResourceHolder<sf::Texture, std::string>& resources, Square startPos):
-	Piece("B", isWhite, resources, startPos) {};
+    Bishop(bool isWhite, ResourceHolder<sf::Texture, std::string>* textures,
+	   Square startPos):
+	Piece("B", isWhite, textures, startPos) {};
 
     std::vector<Move> getMoves
     (const Square& position,
@@ -79,8 +81,9 @@ class Rook: public Piece
     private:
 
     public:
-    Rook(bool isWhite, ResourceHolder<sf::Texture, std::string>& resources, Square startPos):
-	Piece("R", isWhite, resources, startPos) {};
+    Rook(bool isWhite, ResourceHolder<sf::Texture, std::string>* textures,
+	 Square startPos):
+	Piece("R", isWhite, textures, startPos) {};
 
     std::vector<Move> getMoves
     (const Square& position,
@@ -92,8 +95,9 @@ class Queen: public Piece
     private:
 
     public:
-    Queen(bool isWhite, ResourceHolder<sf::Texture, std::string>& resources, Square startPos):
-	Piece("Q", isWhite, resources, startPos) {};
+    Queen(bool isWhite, ResourceHolder<sf::Texture, std::string>* textures,
+	  Square startPos):
+	Piece("Q", isWhite, textures, startPos) {};
 
     std::vector<Move> getMoves
     (const Square& position,
@@ -105,8 +109,9 @@ class King: public Piece
     private:
 
     public:
-    King(bool isWhite, ResourceHolder<sf::Texture, std::string>& resources, Square startPos):
-	Piece("K", isWhite, resources, startPos) {};
+    King(bool isWhite, ResourceHolder<sf::Texture, std::string>* textures,
+	 Square startPos):
+	Piece("K", isWhite, textures, startPos) {};
 
     std::vector<Move> getMoves
     (const Square& position,

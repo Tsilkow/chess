@@ -13,6 +13,8 @@
 #include "commons.hpp"
 #include "piece.hpp"
 #include "board.hpp"
+#include "player.hpp"
+#include "game.hpp"
 #include "resources.hpp"
 
 
@@ -22,47 +24,33 @@ int main()
 {
     ResourceHolder<sf::Texture, std::string> textures;
 
-    textures.load("board", "data/board.png");
-    textures.load("w" , "data/w.png" );
-    textures.load("wN", "data/wN.png");
-    textures.load("wB", "data/wB.png");
-    textures.load("wR", "data/wR.png");
-    textures.load("wQ", "data/wQ.png");
-    textures.load("wK", "data/wK.png");
-    textures.load("b" , "data/b.png" );
-    textures.load("bN", "data/bN.png");
-    textures.load("bB", "data/bB.png");
-    textures.load("bR", "data/bR.png");
-    textures.load("bQ", "data/bQ.png");
-    textures.load("bK", "data/bK.png");
+    textures.load("board"    , "data/board.png");
+    textures.load("highlight", "data/highlight.png");
+    textures.load("mark"     , "data/mark.png");
+    textures.load("w"        , "data/w.png" );
+    textures.load("wN"       , "data/wN.png");
+    textures.load("wB"       , "data/wB.png");
+    textures.load("wR"       , "data/wR.png");
+    textures.load("wQ"       , "data/wQ.png");
+    textures.load("wK"       , "data/wK.png");
+    textures.load("b"        , "data/b.png" );
+    textures.load("bN"       , "data/bN.png");
+    textures.load("bB"       , "data/bB.png");
+    textures.load("bR"       , "data/bR.png");
+    textures.load("bQ"       , "data/bQ.png");
+    textures.load("bK"       , "data/bK.png");
     
     sf::RenderWindow window(sf::VideoMode(800, 800), "Chess");
     window.setFramerateLimit(60);
-    
-    
-    Board board(textures);
 
-    bool exit = false;
+    std::shared_ptr<Human> first  = std::make_shared<Human>("amigo uno", &window);
+    std::shared_ptr<Human> second = std::make_shared<Human>("amigo dos", &window);
 
-    while(!exit)
-    {
-	window.clear();
-	board.draw(window);
-	window.display();
+    Game game(&window, first, second, &textures);
+
+    game.playOut();
 	
-	board.findMoves();
-	std::vector<Move> moves = board.getMoves();
-	int chosen;
-	
-	for(int i = 0; i < moves.size(); ++i)
-	{
-	    std::cout << i+1 << ": " << moves[i].from << moves[i].to << std::endl;
-	}
-	do{
-	    std::cin >> chosen;
-	}while(chosen < 1 && chosen > moves.size());
-	board.makeAMove(moves[chosen-1]);
-    }
+    window.close();
     
     return 0;
 }
