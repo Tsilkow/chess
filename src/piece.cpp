@@ -36,21 +36,43 @@ std::vector<Move> Pawn::getMoves
     
     if(straight.isValid()  && pieces.count(straight) == 0)
     {
-	result.push_back(Move{position, straight});
+	if(straight.r != 8) result.push_back(Move(position, straight));
+	else
+	{
+	    result.push_back(Move(position, straight, false, 'N'));
+	    result.push_back(Move(position, straight, false, 'B'));
+	    result.push_back(Move(position, straight, false, 'R'));
+	    result.push_back(Move(position, straight, false, 'Q'));
+	}
+	    
 	if(position.r == 7 - 5*m_isWhite && doubled.isValid() && pieces.count(doubled) == 0)
-	    result.push_back(Move{position, doubled});
+	    result.push_back(Move(position, doubled));
     }
     if(diagonal1.isValid() &&
        pieces.find(diagonal1) != pieces.end() &&
        pieces.find(diagonal1)->second->isWhite() != m_isWhite)
     {
-	result.push_back(Move{position, diagonal1});
+	if(diagonal1.r != 8) result.push_back(Move(position, diagonal1, true));
+	else
+	{
+	    result.push_back(Move(position, straight, true, 'N'));
+	    result.push_back(Move(position, straight, true, 'B'));
+	    result.push_back(Move(position, straight, true, 'R'));
+	    result.push_back(Move(position, straight, true, 'Q'));
+	}
     }
     if(diagonal2.isValid() &&
        pieces.find(diagonal2) != pieces.end() &&
        pieces.find(diagonal2)->second->isWhite() != m_isWhite)
     {
-	result.push_back(Move{position, diagonal2});
+	if(diagonal2.r != 8) result.push_back(Move(position, diagonal2, true));
+	else
+	{
+	    result.push_back(Move(position, straight, true, 'N'));
+	    result.push_back(Move(position, straight, true, 'B'));
+	    result.push_back(Move(position, straight, true, 'R'));
+	    result.push_back(Move(position, straight, true, 'Q'));
+	}
     }
 
     return result;
@@ -77,7 +99,11 @@ std::vector<Move> Knight::getMoves
     {
 	if(Ls[i].isValid() && (pieces.find(Ls[i]) == pieces.end() ||
 			       pieces.find(Ls[i])->second->isWhite() != m_isWhite))
-	    result.push_back(Move{position, Ls[i]});
+	{
+	    if(pieces.find(Ls[i]) != pieces.end())
+		result.push_back(Move(position, Ls[i], true));
+	    else result.push_back(Move(position, Ls[i], false));
+	}
     }
 
     return result;
@@ -95,11 +121,11 @@ std::vector<Move> Bishop::getMoves
 	
 	while(curr.isValid() && pieces.find(curr) == pieces.end())
 	{
-	    result.push_back(Move{position, curr});
+	    result.push_back(Move(position, curr));
 	    curr += dir;
 	}
 	if(curr.isValid() && pieces.find(curr)->second->isWhite() != m_isWhite)
-	    result.push_back(Move{position, curr});
+	    result.push_back(Move(position, curr, true));
     }
 
     return result;
@@ -117,11 +143,11 @@ std::vector<Move> Rook::getMoves
 	
 	while(curr.isValid() && pieces.find(curr) == pieces.end())
 	{
-	    result.push_back(Move{position, curr});
+	    result.push_back(Move(position, curr));
 	    curr += dir;
 	}
 	if(curr.isValid() && pieces.find(curr)->second->isWhite() != m_isWhite)
-	    result.push_back(Move{position, curr});
+	    result.push_back(Move(position, curr, true));
     }
 
     return result;
@@ -140,11 +166,11 @@ std::vector<Move> Queen::getMoves
 	
 	while(curr.isValid() && pieces.find(curr) == pieces.end())
 	{
-	    result.push_back(Move{position, curr});
+	    result.push_back(Move(position, curr));
 	    curr += dir;
 	}
 	if(curr.isValid() && pieces.find(curr)->second->isWhite() != m_isWhite)
-	    result.push_back(Move{position, curr});
+	    result.push_back(Move(position, curr, true));
     }
 
     // bishop moves
@@ -155,11 +181,11 @@ std::vector<Move> Queen::getMoves
 	
 	while(curr.isValid() && pieces.find(curr) == pieces.end())
 	{
-	    result.push_back(Move{position, curr});
+	    result.push_back(Move(position, curr));
 	    curr += dir;
 	}
 	if(curr.isValid() && pieces.find(curr)->second->isWhite() != m_isWhite)
-	    result.push_back(Move{position, curr});
+	    result.push_back(Move(position, curr, true));
     }
 
     return result;
@@ -188,7 +214,9 @@ std::vector<Move> King::getMoves
 	   (pieces.find(neighbours[i]) == pieces.end() ||
 	    pieces.find(neighbours[i])->second->isWhite() != m_isWhite))
 	{
-	    result.push_back(Move{position, neighbours[i]});
+	    if(pieces.find(neighbours[i]) != pieces.end())
+		result.push_back(Move(position, neighbours[i], true));
+	    else result.push_back(Move(position, neighbours[i]));
 	}
     }
 

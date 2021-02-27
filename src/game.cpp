@@ -58,19 +58,11 @@ bool Game::playOut()
 
 	    if(m_board.isWhiteToMove())
 	    {
-		if(m_firstPlayer->isMoveReady())
-		{
-		    m_board.makeAMove(m_firstPlayer->getMove());
-		    m_firstPlayer->givePosition(&m_board);
-		}
+		if(m_firstPlayer->isMoveReady() ) m_board.makeAMove(m_firstPlayer->getMove());
 	    }
 	    else
 	    {
-		if(m_secondPlayer->isMoveReady())
-		{
-		    m_board.makeAMove(m_secondPlayer->getMove());
-		    m_secondPlayer->givePosition(&m_board);
-		}
+		if(m_secondPlayer->isMoveReady()) m_board.makeAMove(m_secondPlayer->getMove());
 	    }
 
 	    m_board.draw(*m_window);

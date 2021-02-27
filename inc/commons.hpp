@@ -44,6 +44,20 @@ struct Move
 {
     Square from;
     Square to;
+    bool capture;
+    char promotion;
+    bool kingCastle;
+    bool queenCastle;
+
+    Move(Square _from, Square _to, bool _capture=false, char _promotion=' ', bool _kingCastle=false,
+	 bool _queenCastle=false):
+	from(_from),
+	to(_to),
+	capture(_capture),
+	promotion(_promotion),
+	kingCastle(_kingCastle),
+	queenCastle(_queenCastle)
+	{}
 };
 
 inline Move getInvalidMove() {return Move{getInvalidSquare(), getInvalidSquare()}; }

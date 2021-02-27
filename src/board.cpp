@@ -268,6 +268,8 @@ void Board::findMoves()
 	    std::vector<Move> temp = p.second->getMoves(p.first, m_pieces);
 
 	    m_moves.insert(m_moves.end(), temp.begin(), temp.end());
+
+	    // special moves
 	}
     }
     sort(m_moves.begin(), m_moves.end(), MoveLComp);

@@ -18,6 +18,15 @@
 #include "resources.hpp"
 
 
+/*
+ * TO DO
+ * - implement check
+ * - implement checkmate
+ * - implement en passant
+ * - implement castling
+ * - implement promoting
+ */
+
 //using namespace std;
 
 int main()
