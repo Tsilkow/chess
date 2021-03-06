@@ -11,6 +11,21 @@
 #include "resources.hpp"
 
 
+inline int sideSign(bool isWhite) {return 2*isWhite - 1; }
+
+struct SquareStatus
+{
+    int occupied; // -1 = black, 0 = empty, 1 = white
+    int guardedByWhite;
+    int guardedByBlack;
+
+    bool isEnemy(bool isWhite) {return (occupied == sideSign(!isWhite)); }
+    bool isEmpty() {return (occupied == 0); }
+    bool isGuarded(bool isWhite) {return (isWhite && guardedByBlack > 0) || (!isWhite && guardedByWhite > 0); }
+    bool isDoublyGuarded(bool isWhite)
+	{return (isWhite && guardedByBlack > 1) || (!isWhite && guardedByWhite > 1); }
+};
+
 class Piece
 {
     protected:
@@ -24,10 +39,10 @@ class Piece
     Piece(std::string abbreviation, bool isWhite,
 	  ResourceHolder<sf::Texture, std::string>* textures, Square startPos);
     virtual std::vector<Move> getMoves
-    (const Square& position, const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces)=0;
+    (const Square& position, std::vector< std::vector<SquareStatus> >& squareStatuses)=0;
     // -1 = black, 0 = empty, 1 = white
 
-    void move(Square moveTo);
+    void move(const Move& move, std::vector< std::vector<SquareStatus> >& squareStatuses);
 
     void draw(sf::RenderTarget& target);
     
@@ -44,8 +59,7 @@ class Pawn: public Piece
 	Piece("", isWhite, textures, startPos) {};
 
     std::vector<Move> getMoves
-    (const Square& position,
-     const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces) override;
+    (const Square& position, std::vector< std::vector<SquareStatus> >& squareStatuses) override;
 };
 
 class Knight: public Piece
@@ -58,8 +72,7 @@ class Knight: public Piece
 	Piece("N", isWhite, textures, startPos) {};
 
     std::vector<Move> getMoves
-    (const Square& position,
-     const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces) override;
+    (const Square& position, std::vector< std::vector<SquareStatus> >& squareStatuses) override;
 };
 
 class Bishop: public Piece
@@ -72,8 +85,7 @@ class Bishop: public Piece
 	Piece("B", isWhite, textures, startPos) {};
 
     std::vector<Move> getMoves
-    (const Square& position,
-     const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces) override;
+    (const Square& position, std::vector< std::vector<SquareStatus> >& squareStatuses) override;
 };
 
 class Rook: public Piece
@@ -86,8 +98,7 @@ class Rook: public Piece
 	Piece("R", isWhite, textures, startPos) {};
 
     std::vector<Move> getMoves
-    (const Square& position,
-     const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces) override;
+    (const Square& position, std::vector< std::vector<SquareStatus> >& squareStatuses) override;
 };
 
 class Queen: public Piece
@@ -100,8 +111,7 @@ class Queen: public Piece
 	Piece("Q", isWhite, textures, startPos) {};
 
     std::vector<Move> getMoves
-    (const Square& position,
-     const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces) override;
+    (const Square& position, std::vector< std::vector<SquareStatus> >& squareStatuses) override;
 };
 
 class King: public Piece
@@ -114,6 +124,5 @@ class King: public Piece
 	Piece("K", isWhite, textures, startPos) {};
 
     std::vector<Move> getMoves
-    (const Square& position,
-     const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces) override;
+    (const Square& position, std::vector< std::vector<SquareStatus> >& squareStatuses) override;
 };
