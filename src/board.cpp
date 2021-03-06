@@ -16,9 +16,7 @@ Board::Board(ResourceHolder<sf::Texture, std::string>* textures, FEN startPos):
     m_wQCastle(false),
     m_bKCastle(false),
     m_bQCastle(false),
-    m_enpassant(getInvalidSquare()),
-    m_squareStatuses(9, std::vector<SquareStatus>(9, {0, 0, 0})),
-    m_state(BoardState::Unconcluded)
+    m_enpassant(getInvalidSquare())
 {
     m_boardSprite.setTexture(textures->get("board"));
     m_boardSprite.setPosition(sf::Vector2f(0, 0));
@@ -93,62 +91,50 @@ Board::Board(ResourceHolder<sf::Texture, std::string>* textures, FEN startPos):
 		    case 'p':
 			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<Pawn>
 						       (false, textures, Square(c, r))));
-			atSquare(m_squareStatuses, Square(c, r)) = SquareStatus{-1, 0, 0};
 			break;
 		    case 'n':
 			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<Knight>
 						       (false, textures, Square(c, r))));
-			atSquare(m_squareStatuses, Square(c, r)) = SquareStatus{-1, 0, 0};
 			break;
 		    case 'b':
 			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<Bishop>
 						       (false, textures, Square(c, r))));
-			atSquare(m_squareStatuses, Square(c, r)) = SquareStatus{-1, 0, 0};
 			break;
 		    case 'r':
 			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<Rook>
 						       (false, textures, Square(c, r))));
-			atSquare(m_squareStatuses, Square(c, r)) = SquareStatus{-1, 0, 0};
 			break;
 		    case 'q':
 			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<Queen>
 						       (false, textures, Square(c, r))));
-			atSquare(m_squareStatuses, Square(c, r)) = SquareStatus{-1, 0, 0};
 			break;
 		    case 'k':
 			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<King>
 						       (false, textures, Square(c, r))));
-			atSquare(m_squareStatuses, Square(c, r)) = SquareStatus{-1, 0, 0};
 			break;
 		    case 'P':
 			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<Pawn>
 						       (true, textures, Square(c, r))));
-			atSquare(m_squareStatuses, Square(c, r)) = SquareStatus{ 1, 0, 0};
 			break;
 		    case 'N':
 			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<Knight>
 						       (true, textures, Square(c, r))));
-			atSquare(m_squareStatuses, Square(c, r)) = SquareStatus{ 1, 0, 0};
 			break;
 		    case 'B':
 			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<Bishop>
 						       (true, textures, Square(c, r))));
-			atSquare(m_squareStatuses, Square(c, r)) = SquareStatus{ 1, 0, 0};
 			break;
 		    case 'R':
 			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<Rook>
 						       (true, textures, Square(c, r))));
-			atSquare(m_squareStatuses, Square(c, r)) = SquareStatus{ 1, 0, 0};
 			break;
 		    case 'Q':
 			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<Queen>
 						       (true, textures, Square(c, r))));
-			atSquare(m_squareStatuses, Square(c, r)) = SquareStatus{ 1, 0, 0};
 			break;
 		    case 'K':
 			m_pieces.insert(std::make_pair(Square(c, r), std::make_shared<King>
 						       (true, textures, Square(c, r))));
-			atSquare(m_squareStatuses, Square(c, r)) = SquareStatus{ 1, 0, 0};
 			break;
 		    default:
 			std::cout << "!ERROR! Invalid character in 1st segment of FEN in starting position. Using default starting position ..." << std::endl;
@@ -252,7 +238,7 @@ bool Board::mark(Square at)
     if(temp == m_marks.end())
     {
 	m_marks.insert(std::make_pair(at, sf::Sprite(m_textures->get("mark"))));
-	m_marks[at].setPosition(sf::Vector2f((at.c-1)*GgetTileSize(), (8-at.r)*GgetTileSize()));
+	m_marks[at].setPosition(sf::Vector2f((at.c-1)*GgetTileSize(), (at.r-1)*GgetTileSize()));
 	return true;
     }
     m_marks.erase(temp);
@@ -273,16 +259,13 @@ bool Board::highlight(Square at)
 
 void Board::findMoves()
 {
-    Square kingsPos;
-    bool check = false;
-    bool doubleCheck = false;
     m_moves.clear();
     
     for(auto &p: m_pieces)
     {
 	if(p.second->isWhite() == m_whiteToMove)
 	{
-	    std::vector<Move> temp = p.second->getMoves(p.first, m_squareStatuses);
+	    std::vector<Move> temp = p.second->getMoves(p.first, m_pieces);
 
 	    m_moves.insert(m_moves.end(), temp.begin(), temp.end());
 
@@ -290,41 +273,6 @@ void Board::findMoves()
 	}
     }
     sort(m_moves.begin(), m_moves.end(), MoveLComp);
-
-    //get king's position
-    
-    for(auto it = m_pieces.begin(); it != m_pieces.end(); ++it)
-    {
-	if(it->second->getAbbrev()[1] == 'K' && it->second->isWhite() == m_whiteToMove)
-	{
-	    kingsPos = it->first;
-	    break;
-	}
-    }
-
-    // handle checks
-    
-    if(atSquare(m_squareStatuses, kingsPos).isGuarded())
-    {
-	check = true;
-	if(atSquare(m_squareStatuses, kingsPos).isDoublyGuarded()) doubleCheck = true;
-    }
-
-    // in case of a double check eliminate all moves not by king
-
-    if(doubleCheck)
-    {
-	for(auto it = m_moves.begin(); it != m_moves.end();)
-	{
-	    if(m_pieces[it->second->from]->getAbbrev() != 'K') it = m_moves.erase(it);
-	    else ++it;
-	}
-    }
-    else if(check)
-    {
-    }
-
-    // elimitinate moves of pieces absolutely pinned
 }
 
 bool Board::makeAMove(Move chosen)
@@ -340,7 +288,7 @@ bool Board::makeAMove(Move chosen)
     }
     if(!found) return false;
 
-    m_pieces[chosen.from]->move(chosen, m_squareStatuses);
+    m_pieces[chosen.from]->move(chosen.to);
     auto pieceToMove = m_pieces.extract(chosen.from);
     auto pieceToCapture = m_pieces.find(chosen.to);
 	

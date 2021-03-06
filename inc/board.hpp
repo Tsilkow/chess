@@ -29,7 +29,6 @@ class Board
     private:
     ResourceHolder<sf::Texture, std::string>* m_textures;
     std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)> m_pieces;
-    std::vector< std::vector<SquareStatus> > m_squareStatuses;
     bool m_whiteToMove;
     bool m_wKCastle; // can white castle kingside
     bool m_wQCastle; // can white castle queenside
@@ -51,7 +50,7 @@ class Board
     public:
     Board(ResourceHolder<sf::Texture, std::string>* textures, FEN start = getDefaultStart());
     
-    Square getSquareAt(sf::Vector2f at) {return Square(at.x/GgetTileSize()+1, 9-at.y/GgetTileSize()); }
+    Square getSquareAt(sf::Vector2f at) {return Square(at.x/GgetTileSize()+1, at.y/GgetTileSize()+1); }
 
     bool mark(Square at);
 
