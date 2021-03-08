@@ -12,8 +12,9 @@ bool Human::processInput(int ticksPassed, sf::Vector2f mouse, sf::Event event)
     Square mouseAt = m_board->getSquareAt(mouse);
     //std::cout << mouseAt << "\n";
     
-    if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
+    if(event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
     {
+	std::cout << "LEFT MOUSE RELEASED" << std::endl;
 	if(m_activeMoves.size() != 0)
 	{
 	    for(auto &m: m_activeMoves)
@@ -27,11 +28,11 @@ bool Human::processInput(int ticksPassed, sf::Vector2f mouse, sf::Event event)
 		}
 	    }
 	    m_activeMoves.clear();
+	    m_board->resetMarks();
 	}
-	
-	if(m_activeMoves.size() == 0)
+        else 
 	{
-	    std::vector<Move> moves = m_board->getMoves();
+	    std::set<Move, decltype(&MoveLComp)> moves = m_board->getMoves();
 	    auto it = moves.begin();
 	    bool resetAlready = false;
 	
@@ -51,7 +52,7 @@ bool Human::processInput(int ticksPassed, sf::Vector2f mouse, sf::Event event)
 	    return true;
 	}
     }
-    if(sf::Mouse::isButtonPressed(sf::Mouse::Right))
+    if(event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Right)
     {
 	m_board->mark(mouseAt);
 	return true;

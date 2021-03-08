@@ -1,13 +1,25 @@
 #include "piece.hpp"
 
 
+bool isEmpty(std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)> pieces, const Square& square)
+{
+    return (pieces.count(square) == 0);
+}
+
+bool isEnemy(std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)> pieces,
+	     const Square& square,
+	     bool isWhite)
+{
+    return (!isEmpty(pieces, square) && pieces[square]->isWhite() != isWhite);
+}
+
 Piece::Piece(std::string abbreviation, bool isWhite,
 	     ResourceHolder<sf::Texture, std::string>* textures, Square startPos):
 	m_abbreviation(abbreviation),
 	m_isWhite(isWhite)
 {
     if(m_isWhite) m_sprite.setTexture(textures->get("w" + m_abbreviation));
-    else m_sprite.setTexture(textures->get("b" + m_abbreviation));
+    else          m_sprite.setTexture(textures->get("b" + m_abbreviation));
 
     move(startPos);
 }
@@ -15,7 +27,7 @@ Piece::Piece(std::string abbreviation, bool isWhite,
 void Piece::move(Square moveTo)
 {
     m_sprite.setPosition(sf::Vector2f((moveTo.c-1) * m_sprite.getGlobalBounds().width,
-				      (moveTo.r-1) * m_sprite.getGlobalBounds().height));
+				      (8-moveTo.r) * m_sprite.getGlobalBounds().height));
 }
 
 void Piece::draw(sf::RenderTarget& target)
@@ -23,10 +35,10 @@ void Piece::draw(sf::RenderTarget& target)
     target.draw(m_sprite);
 }
 
-std::vector<Move> Pawn::getMoves
+std::set<Move, decltype(&MoveLComp)> Pawn::getMoves
 (const Square& position, const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces)
 {
-    std::vector<Move> result;
+    std::set<Move, decltype(&MoveLComp)> result(&MoveLComp);
     int enemy = 1 - 2*m_isWhite;
     
     Square straight  = position + Square( 0, -enemy  );
@@ -34,54 +46,50 @@ std::vector<Move> Pawn::getMoves
     Square diagonal1 = position + Square(-1, -enemy  );
     Square diagonal2 = position + Square( 1, -enemy  );
     
-    if(straight.isValid()  && pieces.count(straight) == 0)
+    if(straight.isValid()  && isEmpty(pieces, straight))
     {
-	if(straight.r != 8) result.push_back(Move(position, straight));
+	if(straight.r != 8) result.insert(Move(position, straight));
 	else
 	{
-	    result.push_back(Move(position, straight, false, 'N'));
-	    result.push_back(Move(position, straight, false, 'B'));
-	    result.push_back(Move(position, straight, false, 'R'));
-	    result.push_back(Move(position, straight, false, 'Q'));
+	    result.insert(Move(position, straight, false, 'N'));
+	    result.insert(Move(position, straight, false, 'B'));
+	    result.insert(Move(position, straight, false, 'R'));
+	    result.insert(Move(position, straight, false, 'Q'));
 	}
 	    
-	if(position.r == 7 - 5*m_isWhite && doubled.isValid() && pieces.count(doubled) == 0)
-	    result.push_back(Move(position, doubled));
+	if(position.r == 7 - 5*m_isWhite && doubled.isValid() && isEmpty(pieces, doubled))
+	    result.insert(Move(position, doubled));
     }
-    if(diagonal1.isValid() &&
-       pieces.find(diagonal1) != pieces.end() &&
-       pieces.find(diagonal1)->second->isWhite() != m_isWhite)
+    if(diagonal1.isValid() && isEnemy(pieces, diagonal1, m_isWhite))
     {
-	if(diagonal1.r != 8) result.push_back(Move(position, diagonal1, true));
+	if(diagonal1.r != 8) result.insert(Move(position, diagonal1, true));
 	else
 	{
-	    result.push_back(Move(position, straight, true, 'N'));
-	    result.push_back(Move(position, straight, true, 'B'));
-	    result.push_back(Move(position, straight, true, 'R'));
-	    result.push_back(Move(position, straight, true, 'Q'));
+	    result.insert(Move(position, straight, true, 'N'));
+	    result.insert(Move(position, straight, true, 'B'));
+	    result.insert(Move(position, straight, true, 'R'));
+	    result.insert(Move(position, straight, true, 'Q'));
 	}
     }
-    if(diagonal2.isValid() &&
-       pieces.find(diagonal2) != pieces.end() &&
-       pieces.find(diagonal2)->second->isWhite() != m_isWhite)
+    if(diagonal2.isValid() && isEnemy(pieces, diagonal2, m_isWhite))
     {
-	if(diagonal2.r != 8) result.push_back(Move(position, diagonal2, true));
+	if(diagonal2.r != 8) result.insert(Move(position, diagonal2, true));
 	else
 	{
-	    result.push_back(Move(position, straight, true, 'N'));
-	    result.push_back(Move(position, straight, true, 'B'));
-	    result.push_back(Move(position, straight, true, 'R'));
-	    result.push_back(Move(position, straight, true, 'Q'));
+	    result.insert(Move(position, straight, true, 'N'));
+	    result.insert(Move(position, straight, true, 'B'));
+	    result.insert(Move(position, straight, true, 'R'));
+	    result.insert(Move(position, straight, true, 'Q'));
 	}
     }
 
     return result;
 }
 
-std::vector<Move> Knight::getMoves
+std::set<Move, decltype(&MoveLComp)> Knight::getMoves
 (const Square& position, const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces)
 {
-    std::vector<Move> result;
+    std::set<Move, decltype(&MoveLComp)> result(&MoveLComp);
 
     std::vector<Square> Ls =
     {
@@ -97,66 +105,62 @@ std::vector<Move> Knight::getMoves
 
     for(int i = 0; i < Ls.size(); ++i)
     {
-	if(Ls[i].isValid() && (pieces.find(Ls[i]) == pieces.end() ||
-			       pieces.find(Ls[i])->second->isWhite() != m_isWhite))
+	if(Ls[i].isValid())
 	{
-	    if(pieces.find(Ls[i]) != pieces.end())
-		result.push_back(Move(position, Ls[i], true));
-	    else result.push_back(Move(position, Ls[i], false));
+	    if     (isEnemy(pieces, Ls[i], m_isWhite)) result.insert(Move(position, Ls[i], true));
+	    else if(isEmpty(pieces, Ls[i]))            result.insert(Move(position, Ls[i], false));
 	}
     }
 
     return result;
 }
 
-std::vector<Move> Bishop::getMoves
+std::set<Move, decltype(&MoveLComp)> Bishop::getMoves
 (const Square& position, const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces)
 {
-    std::vector<Move> result;
+    std::set<Move, decltype(&MoveLComp)> result(&MoveLComp);
 
     for(int i = 0; i < 4; ++i)
     {
 	Square dir(1-2*(i/2), 1-2*(i%2));
 	Square curr = position + dir;
 	
-	while(curr.isValid() && pieces.find(curr) == pieces.end())
+	while(curr.isValid() && isEmpty(pieces, curr))
 	{
-	    result.push_back(Move(position, curr));
+	    result.insert(Move(position, curr));
 	    curr += dir;
 	}
-	if(curr.isValid() && pieces.find(curr)->second->isWhite() != m_isWhite)
-	    result.push_back(Move(position, curr, true));
+	if(curr.isValid() && isEnemy(pieces, curr, m_isWhite)) result.insert(Move(position, curr, true));
     }
 
     return result;
 }
 
-std::vector<Move> Rook::getMoves
+std::set<Move, decltype(&MoveLComp)> Rook::getMoves
 (const Square& position, const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces)
 {
-    std::vector<Move> result;
+    std::set<Move, decltype(&MoveLComp)> result(&MoveLComp);
 
     for(int i = 0; i < 4; ++i)
     {
 	Square dir(((i+1)%2) * (1 - i/2*2), (i%2) * (1 - i/2*2));
 	Square curr = position + dir;
 	
-	while(curr.isValid() && pieces.find(curr) == pieces.end())
+	while(curr.isValid() && isEmpty(pieces, curr))
 	{
-	    result.push_back(Move(position, curr));
+	    result.insert(Move(position, curr));
 	    curr += dir;
 	}
-	if(curr.isValid() && pieces.find(curr)->second->isWhite() != m_isWhite)
-	    result.push_back(Move(position, curr, true));
+	if(curr.isValid() && isEnemy(pieces, curr, m_isWhite)) result.insert(Move(position, curr, true));
     }
 
     return result;
 }
 
-std::vector<Move> Queen::getMoves
+std::set<Move, decltype(&MoveLComp)> Queen::getMoves
 (const Square& position, const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces)
 {
-    std::vector<Move> result;
+    std::set<Move, decltype(&MoveLComp)> result(&MoveLComp);
 
     // rook moves
     for(int i = 0; i < 4; ++i)
@@ -164,13 +168,12 @@ std::vector<Move> Queen::getMoves
 	Square dir(((i+1)%2) * (1 - i/2*2), (i%2) * (1 - i/2*2));
 	Square curr = position + dir;
 	
-	while(curr.isValid() && pieces.find(curr) == pieces.end())
+	while(curr.isValid() && isEmpty(pieces, curr))
 	{
-	    result.push_back(Move(position, curr));
+	    result.insert(Move(position, curr));
 	    curr += dir;
 	}
-	if(curr.isValid() && pieces.find(curr)->second->isWhite() != m_isWhite)
-	    result.push_back(Move(position, curr, true));
+	if(curr.isValid() && isEnemy(pieces, curr, m_isWhite)) result.insert(Move(position, curr, true));
     }
 
     // bishop moves
@@ -179,24 +182,23 @@ std::vector<Move> Queen::getMoves
 	Square dir(1-2*(i/2), 1-2*(i%2));
 	Square curr = position + dir;
 	
-	while(curr.isValid() && pieces.find(curr) == pieces.end())
+	while(curr.isValid() && isEmpty(pieces, curr))
 	{
-	    result.push_back(Move(position, curr));
+	    result.insert(Move(position, curr));
 	    curr += dir;
 	}
-	if(curr.isValid() && pieces.find(curr)->second->isWhite() != m_isWhite)
-	    result.push_back(Move(position, curr, true));
+	if(curr.isValid() && isEnemy(pieces, curr, m_isWhite)) result.insert(Move(position, curr, true));
     }
 
     return result;
 }
 
-std::vector<Move> King::getMoves
+std::set<Move, decltype(&MoveLComp)> King::getMoves
 (const Square& position, const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces)
 {
-    std::vector<Move> result;
+    std::set<Move, decltype(&MoveLComp)> result(&MoveLComp);
     
-    std::vector<Square> neighbours =
+    std::vector<Square> Ns =
     {
 	position + Square( 0,  1),
 	position + Square( 1,  1),
@@ -208,15 +210,12 @@ std::vector<Move> King::getMoves
 	position + Square(-1,  1)
     };
 
-    for(int i = 0; i < neighbours.size(); ++i)
+    for(int i = 0; i < Ns.size(); ++i)
     {
-	if(neighbours[i].isValid() &&
-	   (pieces.find(neighbours[i]) == pieces.end() ||
-	    pieces.find(neighbours[i])->second->isWhite() != m_isWhite))
+	if(Ns[i].isValid())
 	{
-	    if(pieces.find(neighbours[i]) != pieces.end())
-		result.push_back(Move(position, neighbours[i], true));
-	    else result.push_back(Move(position, neighbours[i]));
+	    if     (isEnemy(pieces, Ns[i], m_isWhite)) result.insert(Move(position, Ns[i], true));
+	    else if(isEmpty(pieces, Ns[i]))            result.insert(Move(position, Ns[i], false));
 	}
     }
 

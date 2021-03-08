@@ -22,7 +22,9 @@ struct FEN
 
 FEN getDefaultStart();
 
-enum BoardState{Unconcluded, Checkmate, Stalemate};
+enum BoardState{Normal=0, Check=1, Checkmate=2, Stalemate=3};
+
+inline bool isConcluded(BoardState state) {return (state >= 2); }
 
 class Board
 {
@@ -35,9 +37,11 @@ class Board
     bool m_bKCastle; // can black castle kingside
     bool m_bQCastle; // can black castle queenside
     Square m_enpassant; // en passant move in previous turn; if there wasn't one, it's set to InvalidSquare
+    Square m_wKingPos;
+    Square m_bKingPos;
     int m_movesSinceStart;
     int m_movesSinceCapture;
-    std::vector<Move> m_moves;
+    std::set<Move, decltype(&MoveLComp)> m_moves;
     sf::Sprite m_boardSprite;
     std::map<Square, sf::Sprite, decltype(&SquareLComp)> m_marks;
     std::map<Square, sf::Sprite, decltype(&SquareLComp)> m_highlights;
@@ -45,12 +49,14 @@ class Board
 
     bool highlight(Square at);
     
+    std::vector<Square> findAttackers(const Square& target, bool side);
+    
     void findMoves();
     
     public:
     Board(ResourceHolder<sf::Texture, std::string>* textures, FEN start = getDefaultStart());
     
-    Square getSquareAt(sf::Vector2f at) {return Square(at.x/GgetTileSize()+1, at.y/GgetTileSize()+1); }
+    Square getSquareAt(sf::Vector2f at) {return Square(at.x/GgetTileSize()+1, 9-at.y/GgetTileSize()); }
 
     bool mark(Square at);
 
@@ -62,7 +68,7 @@ class Board
 
     const BoardState& getState() {return m_state; }
 
-    const std::vector<Move>& getMoves() {return m_moves; }
+    const std::set<Move, decltype(&MoveLComp)>& getMoves() {return m_moves; }
 
     const bool isWhiteToMove() {return m_whiteToMove; }
 };

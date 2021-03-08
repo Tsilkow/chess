@@ -12,6 +12,8 @@ struct Square
     short r; // row
     
     Square(int _c, int _r): c(_c), r(_r) {}
+    const int getDiag1() const {return c + r; }
+    const int getDiag2() const {return c - r; }
     bool isValid();
 };
 

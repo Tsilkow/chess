@@ -23,7 +23,7 @@ class Piece
 
     Piece(std::string abbreviation, bool isWhite,
 	  ResourceHolder<sf::Texture, std::string>* textures, Square startPos);
-    virtual std::vector<Move> getMoves
+    virtual std::set<Move, decltype(&MoveLComp)> getMoves
     (const Square& position, const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces)=0;
     // -1 = black, 0 = empty, 1 = white
 
@@ -43,7 +43,7 @@ class Pawn: public Piece
     Pawn(bool isWhite, ResourceHolder<sf::Texture, std::string>* textures, Square startPos):
 	Piece("", isWhite, textures, startPos) {};
 
-    std::vector<Move> getMoves
+    std::set<Move, decltype(&MoveLComp)> getMoves
     (const Square& position,
      const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces) override;
 };
@@ -57,7 +57,7 @@ class Knight: public Piece
 	   Square startPos):
 	Piece("N", isWhite, textures, startPos) {};
 
-    std::vector<Move> getMoves
+    std::set<Move, decltype(&MoveLComp)> getMoves
     (const Square& position,
      const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces) override;
 };
@@ -71,7 +71,7 @@ class Bishop: public Piece
 	   Square startPos):
 	Piece("B", isWhite, textures, startPos) {};
 
-    std::vector<Move> getMoves
+    std::set<Move, decltype(&MoveLComp)> getMoves
     (const Square& position,
      const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces) override;
 };
@@ -85,7 +85,7 @@ class Rook: public Piece
 	 Square startPos):
 	Piece("R", isWhite, textures, startPos) {};
 
-    std::vector<Move> getMoves
+    std::set<Move, decltype(&MoveLComp)> getMoves
     (const Square& position,
      const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces) override;
 };
@@ -99,7 +99,7 @@ class Queen: public Piece
 	  Square startPos):
 	Piece("Q", isWhite, textures, startPos) {};
 
-    std::vector<Move> getMoves
+    std::set<Move, decltype(&MoveLComp)> getMoves
     (const Square& position,
      const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces) override;
 };
@@ -113,7 +113,7 @@ class King: public Piece
 	 Square startPos):
 	Piece("K", isWhite, textures, startPos) {};
 
-    std::vector<Move> getMoves
+    std::set<Move, decltype(&MoveLComp)> getMoves
     (const Square& position,
      const std::map<Square, std::shared_ptr<Piece>, decltype(&SquareLComp)>& pieces) override;
 };

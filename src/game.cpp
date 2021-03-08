@@ -14,7 +14,7 @@ Game::Game(sf::RenderWindow* window, std::shared_ptr<Player> firstPlayer, std::s
 
 bool Game::playOut()
 {
-    while(m_board.getState() == BoardState::Unconcluded)
+    while(!isConcluded(m_board.getState()))
     {
 	sf::Event event;
 	m_window->clear();
@@ -55,21 +55,21 @@ bool Game::playOut()
 			   event);
 		}
 	    }
-
-	    if(m_board.isWhiteToMove())
-	    {
-		if(m_firstPlayer->isMoveReady() ) m_board.makeAMove(m_firstPlayer->getMove());
-	    }
-	    else
-	    {
-		if(m_secondPlayer->isMoveReady()) m_board.makeAMove(m_secondPlayer->getMove());
-	    }
-
-	    m_board.draw(*m_window);
-	    m_window->display();
-
-	    ++m_ticksPassed;
 	}
+
+	if(m_board.isWhiteToMove())
+	{
+	    if(m_firstPlayer->isMoveReady() ) m_board.makeAMove(m_firstPlayer->getMove());
+	}
+	else
+	{
+	    if(m_secondPlayer->isMoveReady()) m_board.makeAMove(m_secondPlayer->getMove());
+	}
+
+	m_board.draw(*m_window);
+	m_window->display();
+
+	++m_ticksPassed;
     }
 
     return true;
